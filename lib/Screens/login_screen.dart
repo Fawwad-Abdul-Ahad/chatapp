@@ -1,6 +1,8 @@
 import 'package:chatapp/Screens/home_screen.dart';
 import 'package:chatapp/Screens/signup_screen.dart';
 import 'package:chatapp/provider/firebase_ogin_provider.dart';
+import 'package:chatapp/services/chat_services2.dart';
+import 'package:chatapp/widget/snackbar_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chatapp/constants/colors.dart';
@@ -16,7 +18,40 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
-    final firebaseProv = Provider.of<FirebaseAuthService>(context);
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passController = TextEditingController();
+
+void despose(){
+  super.dispose();
+  emailController.dispose();
+  passController.dispose();
+}
+
+  void loginUsers ()async{
+  bool isLoading = false;
+  String res = await AuthService().loginUser(
+    // name: nameController1.text,
+    email: emailController.text,
+    pass: passController.text
+  );
+
+  if(res == 'success'){
+    setState((){
+      isLoading = true;
+    });
+        Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const HomeScreen()),
+  );
+  }
+  else{
+    setState(() {
+      isLoading = true;
+    });
+    //show the snackbar error message
+   showSnackbar(context); 
+  }
+}  
   
     return Scaffold(
       body: Stack(
@@ -91,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 10.0),
                           child: TextFormField(
-                            controller: firebaseProv.emailController,
+                            controller: emailController,
                             decoration: InputDecoration(
                                 hintText: "example@gmail.com",
                                 hintStyle: const TextStyle(
@@ -116,7 +151,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 10.0),
                           child: TextFormField(
-                            controller: firebaseProv.passController,
+                             
+                            controller: passController,
                             decoration: InputDecoration(
                                 hintText: "password",
                                 hintStyle: const TextStyle(color: Colors.grey),
@@ -145,9 +181,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(
                           height: 24,
                         ),
-                        Consumer<FirebaseAuthService>(
-                            builder: (context, value, child) {
-                          return Container(
+                       
+                            
+                           Container(
                             width: 320,
                             height: 60,
                             child: ElevatedButton(
@@ -163,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                               onPressed: () {
-                                value.signIn(context);
+                                loginUsers();
                                 // value.emailController.clear();
                                 // value.passController.clear();
                               },
@@ -175,10 +211,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       fontWeight: FontWeight.w400,
                                       color: Colors.white),
                                 ),
-                              ),
+        
                             ),
-                          );
-                        }),
+                          ),
+                        ),
                         const SizedBox(
                           height: 18,
                         ),

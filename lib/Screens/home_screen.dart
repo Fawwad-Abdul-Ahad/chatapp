@@ -1,10 +1,13 @@
-import 'package:chatapp/Screens/chat_screen.dart';
+
+import 'package:chatapp/Screens/chat_screen2.dart';
 import 'package:chatapp/constants/colors.dart';
 // import 'package:chatapp/provider/firebase_auth_service.dart';
 import 'package:chatapp/provider/firebase_ogin_provider.dart';
-import 'package:chatapp/services/chat_service.dart';
+// import 'package:chatapp/services/chat_service.dart';
+import 'package:chatapp/services/chat_services2.dart';
 import 'package:chatapp/widget/drawer_widget.dart';
 import 'package:chatapp/widget/usertile_widget.dart'; // Ensure this widget is correctly implemented.
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -17,14 +20,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ChatService _chatService = ChatService();
-
+  final AuthService _authService = AuthService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<FirebaseAuthService>(context);
-    final _currentUserEmail = authService.emailController.text;
-
+    String _currentUserEmail = _auth.currentUser!.email!.toString();
     return Scaffold(
+      
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.white,
@@ -55,14 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       drawer: drawer(),
-      body: _buildUserList(_currentUserEmail),
+      body: _buildUserList(_currentUserEmail)
     );
   }
 
   Widget _buildUserList(String currentUserEmail) {
     String userEmail = currentUserEmail;
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _chatService.getUsersStream(),
+      stream: _authService.getUsersStream(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text("Error Occurred"));
@@ -99,8 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => ChatScreen(
-              recieverEmail: email,
-              recID: uID,
+              email : userData['email'],
             ),
           ),
         );

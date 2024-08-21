@@ -1,7 +1,10 @@
+import 'package:chatapp/Screens/home_screen.dart';
 import 'package:chatapp/Screens/login_screen.dart';
 import 'package:chatapp/constants/colors.dart';
 import 'package:chatapp/data/data1.dart';
 import 'package:chatapp/provider/firebase_ogin_provider.dart';
+import 'package:chatapp/services/chat_services2.dart';
+import 'package:chatapp/widget/snackbar_widget.dart';
 // import 'package:chatapp/provider/firebase_ogin_provider.dart';
 // import 'package:chatapp/provider/firebase_ogin_provider.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +18,42 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+TextEditingController nameController1 = TextEditingController();
+TextEditingController emailController = TextEditingController();
+TextEditingController passController  = TextEditingController();
+
+void despose(){
+  super.dispose();
+  emailController.dispose();
+  passController.dispose();
+  nameController1.dispose();
+}
+
+void signupUser ()async{
+  bool isLoading = false;
+  String res = await AuthService().SignupUser(
+    name: nameController1.text,
+    email: emailController.text,
+    pass: passController.text
+  );
+
+  if(res == 'success'){
+    setState((){
+      isLoading = true;
+    });
+        Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const HomeScreen()),
+  );
+  }
+  else{
+    setState(() {
+      isLoading = true;
+    });
+    //show the snackbar error message
+   showSnackbar(context); 
+  }
+}  
   @override
   Widget build(BuildContext context) {
     final FirebaseProv = Provider.of<FirebaseAuthService>(context);
@@ -91,7 +130,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 10.0),
                           child: TextFormField(
-                            controller: nameController,
+                            controller: nameController1,
                             decoration: InputDecoration(
                                 hintText: "Name",
                                 hintStyle: const TextStyle(
@@ -117,7 +156,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 10.0),
                           child: TextFormField(
-                            controller: FirebaseProv.emailController,
+                            controller: emailController,
                             decoration: InputDecoration(
                                 hintText: "Email",
                                 hintStyle: const TextStyle(
@@ -143,7 +182,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 10.0),
                           child: TextFormField(
-                            controller: FirebaseProv.passController,
+                            controller:  passController,
                             decoration: InputDecoration(
                                 hintText: "Password",
                                 hintStyle: const TextStyle(
@@ -166,9 +205,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         const SizedBox(
                           height: 24,
                         ),
-                        Consumer<FirebaseAuthService>(
-                            builder: (context, value, child) {
-                          return Container(
+                       
+                            
+                           Container(
                             width: 320,
                             height: 60,
                             child: ElevatedButton(
@@ -184,7 +223,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ),
                               onPressed: () {
-                                value.signUp(context);
+                                signupUser();
                               },
                               child: const Center(
                                 child: Text(
@@ -194,10 +233,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                       fontWeight: FontWeight.w400,
                                       color: Colors.white),
                                 ),
-                              ),
+                          
                             ),
-                          );
-                        }),
+                          ),
+                        ),
                       ],
                     ),
                   ),
